@@ -1,0 +1,108 @@
+✔ a delayed analytics response cannot reopen the dashboard after logout (4.348708ms)
+✔ IP forwarding requires explicit trust and loopback peer (0.95575ms)
+✔ analytics require login, bound elapsed time, persist, and revoke sessions (215.939125ms)
+✔ damaged analytics are preserved while visits remain usable (6.099958ms)
+✔ misspellings and acronyms are normalized, unknown names stay intact (1.593167ms)
+✔ adult filter blocks explicit queries without blocking educational topics (0.594333ms)
+✔ extracts use abstract text and never invent a missing abstract (0.707792ms)
+✔ no API key produces an explicitly labeled extract fallback (0.5065ms)
+✔ AI overview uses abstracts, bounded tokens, source references and moderation (2.49875ms)
+✔ frontend handles search, escaped titles, bookmark persistence, removal and JSON export (8.589208ms)
+✔ malformed bookmark storage does not crash rendering (0.934083ms)
+✔ search failure re-enables submit and displays the error (0.337125ms)
+✔ switching to reading list while search finishes preserves reading-list status (0.383792ms)
+✔ correction notice and cited AI overview render without interpreting HTML (1.319042ms)
+✔ connection failure explains how to restart and does not claim no matches (0.734625ms)
+✔ pagination shows ten papers, keeps global ranks, and exports the full collection (1.2125ms)
+✔ cancel search aborts request and restores usable controls (0.68375ms)
+✔ launcher passwords are salted and reject incorrect passwords (99.688709ms)
+✔ short passwords and corrupt credentials fail closed (0.167959ms)
+[RECEIVED] Search accepted: language
+✔ request handler serves assets without a socket (7.196042ms)
+[RETRIEVAL] Loaded 6 bundled demonstration records; synopses are paraphrased.
+[RANKING] Tokenizing titles and abstracts; applying BM25 with title weighting and acronym expansion.
+[FILTER] 4 results after year and relevance filters.
+[COMPLETE] Finished in 3 ms. Scores are lexical relevance, not confidence probabilities.
+[SUMMARY] Preparing abstract extracts. AI overview requires a server API key.
+[ERROR] Invalid search filters.
+✔ request handler streams demo results without a socket (3.659667ms)
+✔ request handler rejects invalid filters without a socket (0.270375ms)
+✔ acronyms expand and unrelated papers are excluded (0.080542ms)
+✔ newest sorting still excludes unrelated papers (0.385959ms)
+✔ year filter and empty corpus are safe (0.052ms)
+✔ Atom metadata and entities are parsed (0.325292ms)
+✔ application assets load (13.613583ms)
+[RECEIVED] Search accepted: language
+[RETRIEVAL] Loaded 6 bundled demonstration records; synopses are paraphrased.
+[RANKING] Tokenizing titles and abstracts; applying BM25 with title weighting and acronym expansion.
+[FILTER] 4 results after year and relevance filters.
+[COMPLETE] Finished in 1 ms. Scores are lexical relevance, not confidence probabilities.
+[SUMMARY] Preparing abstract extracts. AI overview requires a server API key.
+✔ demo search streams real results and observable logs (3.536417ms)
+[ERROR] Expected property name or '}' in JSON at position 1 (line 1 column 2)
+[ERROR] Enter a search between 2 and 200 characters.
+[ERROR] Invalid search filters.
+[RECEIVED] Search accepted: fixture agriculture
+[RETRIEVAL] Searching Crossref across disciplines and arXiv in parallel.
+✔ invalid input emits a readable error (2.443208ms)
+[RETRIEVAL] Crossref: 3 records retrieved.
+[RETRIEVAL] arXiv: 0 records retrieved.
+[RANKING] Tokenizing titles and abstracts; applying BM25 with title weighting and acronym expansion.
+[FILTER] 2 results after year and relevance filters.
+[COMPLETE] Finished in 1 ms. Scores are lexical relevance, not confidence probabilities.
+[SUMMARY] Preparing abstract extracts. AI overview requires a server API key.
+[RECEIVED] Search accepted: fixture agriculture
+[CACHE] Reused cached records.
+[RANKING] Tokenizing titles and abstracts; applying BM25 with title weighting and acronym expansion.
+[FILTER] 2 results after year and relevance filters.
+[COMPLETE] Finished in 0 ms. Scores are lexical relevance, not confidence probabilities.
+[SUMMARY] Preparing abstract extracts. AI overview requires a server API key.
+[RECEIVED] Search accepted: partial test
+[RETRIEVAL] Searching Crossref across disciplines and arXiv in parallel.
+✔ live search retains distinct version-like DOIs, deduplicates repeats, and uses cache (1.184458ms)
+[RETRIEVAL] Crossref: 1 records retrieved.
+[WARNING] arXiv could not complete this search.
+[RANKING] Tokenizing titles and abstracts; applying BM25 with title weighting and acronym expansion.
+[FILTER] 1 results after year and relevance filters.
+[COMPLETE] Finished in 3102 ms. Scores are lexical relevance, not confidence probabilities.
+[SUMMARY] Preparing abstract extracts. AI overview requires a server API key.
+[RECEIVED] Search accepted: both offline
+[RETRIEVAL] Searching Crossref across disciplines and arXiv in parallel.
+✔ one failed source preserves results and shows a warning (3102.206125ms)
+[WARNING] Crossref could not complete this search.
+[WARNING] arXiv could not complete this search.
+[ERROR] Live sources are unavailable. Check your internet connection and try again.
+[RECEIVED] Search accepted: ariticial intelligence
+[QUERY] Searching for: artificial intelligence
+[RETRIEVAL] Searching Crossref across disciplines and arXiv in parallel.
+✔ both unavailable sources return an explicit error (3101.660167ms)
+[RETRIEVAL] Crossref: 1 records retrieved.
+[RETRIEVAL] arXiv: 0 records retrieved.
+[RANKING] Tokenizing titles and abstracts; applying BM25 with title weighting and acronym expansion.
+[FILTER] 1 results after year and relevance filters.
+[COMPLETE] Finished in 3101 ms. Scores are lexical relevance, not confidence probabilities.
+[SUMMARY] Preparing abstract extracts. AI overview requires a server API key.
+[ERROR] Adult or sexually explicit content is not supported. Please search for an educational topic.
+✔ misspelled artificial intelligence is corrected before retrieval and returns summaries (3102.012834ms)
+[RECEIVED] Search accepted: cancellation test unique
+[RETRIEVAL] Searching Crossref across disciplines and arXiv in parallel.
+✔ adult queries are blocked before calling any external source (1.825041ms)
+✔ disconnecting a search cancels upstream fetches (3098.732958ms)
+✔ Crossref records retain DOI, authors and missing abstract (1.560417ms)
+✔ natural questions drop filler words and retain Unicode (1.03175ms)
+✔ Crossref search safely encodes the query and parses results (0.226291ms)
+✔ provider failures and malformed responses are not treated as empty results (0.216459ms)
+✔ JavaScript prototype property names are valid search terms (0.063542ms)
+✔ one malformed Crossref record does not discard valid papers (0.06725ms)
+✔ Crossref receives and honors cancellation (0.159833ms)
+✔ starting twice detects the existing app without a stack trace (54.047708ms)
+✔ unrelated application on the port is preserved and an alternative is suggested (46.205292ms)
+✔ invalid port displays an understandable error (34.703334ms)
+ℹ tests 45
+ℹ suites 0
+ℹ pass 45
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12529.36475
