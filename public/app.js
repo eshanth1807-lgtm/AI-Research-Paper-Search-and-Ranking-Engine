@@ -1,0 +1,41 @@
+const $=id=>document.getElementById(id);
+let page=1, searchController=null;const PAGE_SIZE=10;
+let papers=[], saved=[], view='explore', busy=false, searched=false, searchStatus='Search any research topic to get started', overview=null, searchFailed=false;
+try { saved=JSON.parse(localStorage.getItem('paperlens.saved')||'[]'); if(!Array.isArray(saved))saved=[]; saved=saved.filter(p=>p&&typeof p.id==='string'&&typeof p.title==='string'&&Array.isArray(p.authors)).map(p=>({...p,matches:Array.isArray(p.matches)?p.matches:[]})); } catch { saved=[]; }
+const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const paperUrl=p=>p.doi?'https://doi.org/'+encodeURIComponent(p.doi):'https://arxiv.org/abs/'+encodeURIComponent(p.id);
+const provider=p=>p.provider||'arXiv';
+function render(){
+ $('saved-count').textContent=saved.length;
+ $('overview').hidden=view==='saved'||!overview;
+ if(overview){$('overview-title').textContent=overview.kind==='ai'?'AI research overview':'Summary information';$('overview-text').textContent=overview.text;$('overview-sources').innerHTML=(overview.sources||[]).map(s=>{const p=papers.find(p=>p.id===s.id);return p?`<li><a href="${paperUrl(p)}" target="_blank" rel="noopener noreferrer">[${escape(s.number)}] ${escape(s.title)}</a></li>`:'';}).join('');}
+ $('status').textContent=view==='saved'?`${saved.length} papers saved in this browser`:searchStatus;
+ $('explore').classList.toggle('active',view==='explore');$('saved').classList.toggle('active',view==='saved');
+ $('breadcrumb').textContent=view==='saved'?'Reading list':'Discover';
+ const list=view==='saved'?saved:papers;
+ $('result-title').textContent=view==='saved'?'Your reading list':'Research papers';
+ $('export').disabled=!list.length;
+ const pages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));page=Math.min(page,pages);
+ $('pagination').hidden=list.length<=PAGE_SIZE;$('page-status').textContent=`Page ${page} of ${pages} · ${list.length} papers`;$('previous-page').disabled=page<=1;$('next-page').disabled=page>=pages;
+ $('results').innerHTML=list.length?list.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE).map((p,i)=>`<article class="card"><div class="card-top"><div><span class="category">${escape(p.category)}</span> ${escape(p.year||'Year unavailable')} · ${escape(provider(p))}</div><span>#${(page-1)*PAGE_SIZE+i+1}</span></div><h3><a href="${paperUrl(p)}" target="_blank" rel="noopener noreferrer">${escape(p.title)}</a></h3><div class="authors">${escape(p.authors.join(', ')||'Authors not supplied')}</div><div class="paper-summary"><b>${p.summary?.kind==='extract'?'Quick abstract extract':'Abstract'}</b><p class="abstract">${escape(p.summary?.text||p.abstract||'Abstract not supplied by this source. Open the paper for details.')}</p></div>${p.summary?.kind==='extract'?`<details><summary>Read full abstract</summary><p class="abstract">${escape(p.abstract)}</p></details>`:''}<details><summary>Why this paper? · BM25 ${escape(p.score)}</summary><p>Matched terms: ${escape((p.matches||[]).join(', ')||'No keyword matches')}. Titles count twice in the indexed text. Scores are comparable only within the same search.</p></details><div class="card-bottom"><a href="${paperUrl(p)}" target="_blank" rel="noopener noreferrer">Read on ${escape(p.doi?'publisher site':'arXiv')} ↗</a><button class="save ${saved.some(s=>s.id===p.id)?'selected':''}" data-id="${escape(p.id)}">${saved.some(s=>s.id===p.id)?'✓ Saved':'＋ Save paper'}</button></div></article>`).join(''):`<div class="empty">${busy?'Searching the collection…':view==='saved'?'Your reading list is empty. Save a paper to find it here.':searchFailed?'Search could not finish. See the message above, then try again.':!searched?'Search any research topic, paper title, or question above.':'No matching papers found. Try different keywords, remove the year filter, or use Live search.'}</div>`;
+}
+$('results').addEventListener('click',e=>{const button=e.target.closest('[data-id]');if(!button)return;const id=button.dataset.id;const existing=saved.some(p=>p.id===id);saved=existing?saved.filter(p=>p.id!==id):[...saved,papers.find(p=>p.id===id)].filter(Boolean);try{localStorage.setItem('paperlens.saved',JSON.stringify(saved));}catch{$('notice').textContent='Browser storage is unavailable. Saved papers will last only for this session; export them to keep a copy.';}render();});
+$('saved').onclick=()=>{view='saved';page=1;render();$('status').textContent=`${saved.length} papers saved in this browser`;};
+$('explore').onclick=()=>{view='explore';page=1;render();$('status').textContent=searchStatus;};
+$('export').onclick=()=>{const list=view==='saved'?saved:papers;const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),papers:list},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='paperlens-papers.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+async function search(event){
+ event?.preventDefault();if(busy||!$('search-form').reportValidity())return;
+ searchController=new AbortController();$('cancel-search').hidden=false;page=1;
+ busy=true;searched=true;searchFailed=false;view='explore';papers=[];overview=null;$('search-button').disabled=true;$('search-button').textContent='Searching…';$('notice').textContent='';$('logs').replaceChildren();searchStatus='Searching…';render();
+ const source=$('source').value;let received=false;
+ function handle(line){if(!line.trim())return;const item=JSON.parse(line);if(item.type==='log'){const li=document.createElement('li');li.textContent=item.message;$('logs').append(li);}if(item.type==='summary'){overview=item;render();}if(item.type==='error')throw Error(item.message);if(item.type==='results'){received=true;papers=item.results;render();searchStatus=`${papers.length} papers · ${item.duration} ms · ${item.cacheHit?'cached':source==='demo'?'demo collection':'live research'}`;if(source==='demo')$('notice').textContent='Demo collection: six real paper references with paraphrased synopses. Choose Live search to search any research topic online.';else $('notice').textContent=(item.warnings||[]).join(' ');if(item.corrected)$('notice').textContent=`Searching for “${item.normalizedQuery}”. `+$('notice').textContent;}}
+ try{const response=await fetch('/api/search',{signal:searchController.signal,method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('query').value,source,year:Number($('year').value),sort:$('sort').value})});if(!response.ok)throw Error(`Search failed (${response.status}).`);const reader=response.body.getReader();const decoder=new TextDecoder();let pending='';while(true){const {value,done}=await reader.read();pending+=decoder.decode(value,{stream:!done});const lines=pending.split('\n');pending=lines.pop();for(const line of lines)handle(line);if(done)break;}handle(pending);if(!received)throw Error('The search ended without results. Please try again.');}
+ catch(error){if(error.name==='AbortError'){searchStatus=received?'Search stopped; received results kept.':'Search cancelled.';$('notice').textContent='You cancelled the search. Enter a topic to try again.';searched=received;return;}searchFailed=true;const networkError=error instanceof TypeError||/failed to fetch|networkerror|load failed/i.test(error.message);$('notice').textContent=networkError?'Cannot connect to PaperLens on your Mac. Run ./start.command in the project folder, keep that Terminal open, then refresh this page.':error.message;searchStatus=received?'Results received; the remaining request was interrupted.':'Search could not complete. See the message below.';}
+ finally{searchController=null;$('cancel-search').hidden=true;busy=false;$('search-button').disabled=false;$('search-button').innerHTML='Search papers <span>↗</span>';render();}
+}
+$('cancel-search').onclick=()=>searchController?.abort();
+$('previous-page').onclick=()=>{page=Math.max(1,page-1);render();};
+$('next-page').onclick=()=>{page++;render();};
+$('search-form').addEventListener('submit',search);
+document.querySelectorAll('[data-query]').forEach(button=>button.onclick=()=>{if(busy)return;$('query').value=button.dataset.query;search();});
+render();

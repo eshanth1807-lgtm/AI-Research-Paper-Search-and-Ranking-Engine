@@ -1,0 +1,12 @@
+const $=id=>document.getElementById(id);let visitors=[],revision=0;
+async function api(url,body){const response=await fetch(url,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await response.json();if(!response.ok){const error=Error(data.error||'Request failed.');error.status=response.status;throw error;}return data;}
+function render(){
+ $('total').textContent=visitors.length;$('online').textContent=visitors.filter(v=>v.online).length;$('hours').textContent=(visitors.reduce((sum,v)=>sum+v.activeSeconds,0)/3600).toFixed(2);
+ const term=$('filter').value.toLowerCase();const shown=visitors.filter(v=>[v.ip,v.device,v.os,v.browser].join(' ').toLowerCase().includes(term));$('visitors').replaceChildren();
+ for(const v of shown){const tr=document.createElement('tr');for(const text of [v.id.slice(0,8),v.ip,v.device+' / '+v.os,v.browser,(v.activeSeconds/3600).toFixed(3)+' h · '+Math.floor(v.activeSeconds/60)+'m '+Math.floor(v.activeSeconds%60)+'s',new Date(v.firstSeen).toLocaleString(),new Date(v.lastSeen).toLocaleString()]){const td=document.createElement('td');td.textContent=text;tr.append(td);}$('visitors').append(tr);}
+ $('empty').hidden=shown.length>0;
+}
+async function load(){const requestRevision=++revision;try{const data=await api('/api/admin/visitors');if(requestRevision!==revision)return;visitors=data.visitors;$('dashboard').hidden=false;$('login-panel').hidden=true;$('message').textContent=data.storageError?'Some analytics could not be saved or loaded. Check server file permissions.':'';$('updated').textContent='Updated '+new Date().toLocaleTimeString();render();}catch(e){if(requestRevision!==revision)return;if(e.status===401){$('dashboard').hidden=true;$('login-panel').hidden=false;visitors=[];$('visitors').replaceChildren();}$('message').textContent=e.message;}}
+$('login').onsubmit=async e=>{e.preventDefault();$('submit').disabled=true;try{await api('/api/admin/login',{password:$('password').value});$('password').value='';await load();}catch(e){$('message').textContent=e.message;}finally{$('submit').disabled=false;}};
+$('logout').onclick=async()=>{revision++;$('dashboard').hidden=true;try{await api('/api/admin/logout',{});visitors=[];$('visitors').replaceChildren();$('dashboard').hidden=true;$('login-panel').hidden=false;$('message').textContent='Signed out.';}catch(e){$('message').textContent=e.message;}};
+$('refresh').onclick=load;$('filter').oninput=render;setInterval(()=>{if(!$('dashboard').hidden)load();},15000);load();
