@@ -79,7 +79,7 @@ OpenAI references: https://developers.openai.com/api/docs/guides/moderation and 
 
 ## Share across different networks
 
-Run `./share.command` to start PaperLens and the bundled Cloudflare Tunnel executable at `tools/cloudflared` in one Terminal. Share the printed HTTPS trycloudflare.com link. Other devices do not need the same Wi-Fi or any software installation. Keep your Mac awake and online. Control+C stops both processes; restarting creates a new link. If port 8788 is occupied, stop the existing app first. If the tunnel cannot connect, the launcher stops the app too. The executable location can be overridden with PAPERLENS_CLOUDFLARED. This is temporary public sharing, not permanent hosting.
+Run `./share.command` to start PaperLens and the separately installed Cloudflare Tunnel executable at `tools/cloudflared` in one Terminal. Share the printed HTTPS trycloudflare.com link. Other devices do not need the same Wi-Fi or any software installation. Keep your Mac awake and online. Control+C stops both processes; restarting creates a new link. If port 8788 is occupied, stop the existing app first. If the tunnel cannot connect, the launcher stops the app too. The executable location can be overridden with PAPERLENS_CLOUDFLARED. This is temporary public sharing, not permanent hosting.
 
 ## Launcher password
 
@@ -95,7 +95,7 @@ The research page discloses tracking and sends 15-second heartbeats. A random Ht
 
 ## File audit and optional browser checks
 
-All required application source files and browser assets are included. The project has its own copy of `tools/cloudflared`; the sharing launcher no longer depends on another project directory. The binary is excluded from Git; keep it when copying this folder to another compatible Mac. No `.env` file is needed in no-key mode. Password and visitor records are generated locally, not example files to recreate or overwrite.
+All required application source files and browser assets are included. The sharing launcher expects `tools/cloudflared` or the path in `PAPERLENS_CLOUDFLARED`. The binary is excluded from GitHub and must be installed separately on a new machine. No `.env` file is needed in no-key mode. Password and visitor records are generated locally, not example files to recreate or overwrite.
 
 `scripts/browser-check.mjs` is an optional developer check requiring Playwright, which is not needed to run the app or the Node test suite. A damaged analytics file is preserved rather than overwritten; tracking continues temporarily in memory and the dashboard displays a storage warning until the file is repaired.
 
@@ -113,7 +113,7 @@ See `docs/TEST_REPORT.md` for verification results and known limitations.
 
 Install Node.js 20.12 or newer, download or clone this repository, open a terminal in the project folder, and run `npm start`. Open http://127.0.0.1:8787. The application has no runtime npm dependencies. Run `npm test` for the automated suite.
 
-For temporary public sharing on macOS, obtain cloudflared from its official release, save the executable as `tools/cloudflared` (or set PAPERLENS_CLOUDFLARED to its path), and run `./share.command`. The first run asks you to create a local password. Neither passwords nor visitor analytics are included in GitHub. `share.command` is a macOS launcher; `npm start` is the portable local-server command.
+For temporary public sharing on macOS, obtain cloudflared from its official release, save the executable as `tools/cloudflared` (or set PAPERLENS_CLOUDFLARED to its path), then run `chmod +x start.command share.command tools/cloudflared` once and run `./share.command`. If using a custom binary path, apply executable permissions to that path instead. The first run asks you to create a local password. Neither passwords nor visitor analytics are included in GitHub. `share.command` is a macOS launcher; `npm start` is the portable local-server command.
 
 ## License
 
